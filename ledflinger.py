@@ -53,7 +53,7 @@ class CircleAnimation(Animation):
         if linux:
             self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
             d = ImageDraw.Draw(self.buffer)
-            d.ellipse([self.pos[0]-2, self.pos[1]-2, self.pos[1]+2, self.pos[1]+2], outline=self.colour)
+            d.ellipse([self.pos[0]-4, self.pos[1]-4, self.pos[0]+4, self.pos[1]+4], fill=self.colour)
         else:
             self.buffer.fill(BLACK)
             pygame.draw.circle(self.buffer, self.colour, self.pos, 4)
@@ -101,7 +101,7 @@ if linux:
     # create matrix device
     serial = spi(port=0, device=0, gpio=noop())
     # TODO: args
-    device = max7219(serial, width=screen_width, height=screen_height) #, rotate=rotate, block_orientation=block_orientation)
+    device = max7219(serial, width=screen_width, height=screen_height, block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
 else:
     # Initialize the game engine
     pygame.init()
@@ -111,10 +111,10 @@ else:
 
 size = (screen_width, screen_height)
 layers = [Layer(size), Layer(size)] #TODO: , flags=pygame.BLEND_ADD)]
-first_anim = CircleAnimation(None, BLUE, (0, 0), (screen_width, screen_height))
+first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height))
 layers[0].add_animation(first_anim)
-layers[0].add_animation(CircleAnimation(None, GREEN, (0, screen_height), (screen_width, 0)))
-layers[1].add_animation(CircleAnimation(None, RED, (screen_width, 0), (0, screen_height), waiting_for=first_anim))
+layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
+layers[1].add_animation(CircleAnimation(None, WHITE, (screen_width, 0), (0, screen_height), waiting_for=first_anim))
 
 #Loop until the user clicks the close button.
 done = False
@@ -154,7 +154,7 @@ try:
             im = Image.new("RGB", size, BLACK)
         for layer in layers:
             if linux:
-                im = ImageChops.add(im, layer.buffer)
+                im = ImageChops.difference(im, layer.buffer)
             else:
                 win.blit(pygame.transform.scale(layer.buffer, win.get_rect().size), (0, 0), special_flags=layer.flags)
 
