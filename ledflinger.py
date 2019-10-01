@@ -6,15 +6,15 @@ if linux:
     from luma.core.interface.serial import spi, noop
     from luma.core.render import canvas
     from luma.core.legacy import text
-    from luma.core.legacy.font import proportional, LCD_FONT
+    from luma.core.legacy.font import proportional, LCD_FONT, CP437_FONT
 
-    from PIL import Image, ImageDraw, ImageChops
+    from PIL import Image, ImageFont, ImageDraw, ImageChops
 
     import time
 else:
     import pygame
 
-import collections
+import collections, math
 
 
 class Animation(object):
@@ -58,6 +58,28 @@ class CircleAnimation(Animation):
             pygame.draw.circle(self.buffer, self.colour, self.pos, 4)
         if self.pos == self.start:
             self.update_pos()
+
+
+class TextAnimation(Animation):
+    def __init__(self, buffer, input_text):
+        super().__init__(buffer)
+        self.drawn = False
+        self.angle = 0
+        self.text = Image.new("RGB", size, BLACK) # TODO: minimum necessary size
+        font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 10)
+        draw = ImageDraw.Draw(self.text)
+        draw.text((0, 0), input_text, font=font, fill=WHITE)
+
+    def should_update(self):
+        return self.angle < self.buffer.size[1] #not self.drawn
+
+    def has_finished(self):
+        return not self.should_update()
+
+    def update(self):
+        self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
+        self.angle += 1
+        self.buffer.paste(self.text.resize((self.buffer.size[0], self.angle), resample=Image.BILINEAR), [0, 0])
 
 
 class Layer(object):
@@ -113,11 +135,13 @@ if linux:
     flaggy = 0
 else:
     flaggy = pygame.BLEND_ADD
-layers = [Layer(size), Layer(size, flags=flaggy)]
-first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height))
+layers = [Layer(size), Layer(size, flags=flaggy), Layer(size, flags=flaggy)]
+text_anim = TextAnimation(None, "Hello")
+first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height), waiting_for=text_anim)
 layers[0].add_animation(first_anim)
-layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
+layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0), waiting_for=text_anim))
 layers[1].add_animation(CircleAnimation(None, WHITE, (screen_width, 0), (0, screen_height), waiting_for=first_anim))
+layers[2].add_animation(text_anim)
 
 #Loop until the user clicks the close button.
 done = False
