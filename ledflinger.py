@@ -15,7 +15,6 @@ else:
     import pygame
 
 import collections
-#from math import pi
 
 
 class Animation(object):
@@ -110,7 +109,11 @@ else:
 
 
 size = (screen_width, screen_height)
-layers = [Layer(size), Layer(size)] #TODO: , flags=pygame.BLEND_ADD)]
+if linux:
+    flaggy = 0
+else:
+    flaggy = pygame.BLEND_ADD
+layers = [Layer(size), Layer(size, flags=flaggy)]
 first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height))
 layers[0].add_animation(first_anim)
 layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
@@ -148,8 +151,6 @@ try:
         for layer in layers:
             layer.update()
 
-        # Go ahead and update the screen with what we've drawn.
-        # This MUST happen after all the other drawing commands.
         if linux:
             im = Image.new("RGB", size, BLACK)
         for layer in layers:
@@ -168,4 +169,7 @@ except KeyboardInterrupt:
     if not linux:
         # Be IDLE friendly
         pygame.quit()
+
+if not linux:
+    pygame.quit()
 
