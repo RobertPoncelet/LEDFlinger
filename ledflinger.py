@@ -51,6 +51,8 @@ class CircleAnimation(Animation):
             self.update_pos()
         if linux:
             self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
+            if self.has_finished():
+                return
             d = ImageDraw.Draw(self.buffer)
             d.ellipse([self.pos[0]-4, self.pos[1]-4, self.pos[0]+4, self.pos[1]+4], fill=self.colour)
         else:
@@ -79,7 +81,24 @@ class TextAnimation(Animation):
     def update(self):
         self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
         self.angle += 1
-        self.buffer.paste(self.text.resize((self.buffer.size[0], self.angle), resample=Image.BILINEAR), [0, 0])
+        self.buffer.paste(self.text.resize((self.buffer.size[0], self.angle)), [0, 0])
+
+
+class BackgroundAnimation(Animation):
+    def __init__(self, buffer, colour):
+        super().__init__(buffer)
+        self.colour = colour
+        self.drawn = False
+
+    def should_update(self):
+        return not self.drawn
+
+    def has_finished(self):
+        return self.drawn
+
+    def update(self):
+        self.buffer.paste(self.colour, [0, 0, self.buffer.size[0], self.buffer.size[1]])
+        self.drawn = True
 
 
 class Layer(object):
@@ -135,13 +154,14 @@ if linux:
     flaggy = 0
 else:
     flaggy = pygame.BLEND_ADD
-layers = [Layer(size), Layer(size, flags=flaggy), Layer(size, flags=flaggy)]
+layers = [Layer(size), Layer(size, flags=flaggy), Layer(size, flags=flaggy), Layer(size, flags=flaggy)]
 text_anim = TextAnimation(None, "Hello")
 first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height), waiting_for=text_anim)
 layers[0].add_animation(first_anim)
 layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0), waiting_for=text_anim))
 layers[1].add_animation(CircleAnimation(None, WHITE, (screen_width, 0), (0, screen_height), waiting_for=first_anim))
 layers[2].add_animation(text_anim)
+layers[3].add_animation(BackgroundAnimation(None, WHITE))
 
 #Loop until the user clicks the close button.
 done = False
@@ -152,7 +172,7 @@ try:
     while not done:
 
         if linux:
-            time.sleep(1./30.)
+            time.sleep(1./30.) # TODO: replace with luma.core.sprite_system.framerate_regulator
         else:
             # This limits the while loop to a max of 30 times per second.
             # Leave this out and we will use all CPU we can.
