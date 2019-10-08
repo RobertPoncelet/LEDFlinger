@@ -14,123 +14,10 @@ if linux:
 else:
     import pygame
 
-import collections, math
-
-
-class Animation(object):
-    def __init__(self, buffer):
-        self.buffer = buffer
-
-
-class CircleAnimation(Animation):
-    def __init__(self, buffer, colour, start, end, waiting_for=None):
-        super().__init__(buffer)
-        self.pos = list(start)
-        self.colour = colour
-        self.start = list(start)
-        self.end = list(end)
-        self.waiting_for = waiting_for
-
-    def should_update(self):
-        if self.waiting_for is None:
-            return True
-        return self.waiting_for.has_finished()
-
-    def has_finished(self):
-        return self.pos == self.end
-
-    def update_pos(self):
-        for i in range(2):
-            if self.pos[i] < self.end[i]:
-                self.pos[i] += 1
-            elif self.pos[i] > self.end[i]:
-                self.pos[i] -= 1
-
-    def update(self):
-        if self.pos != self.start:
-            self.update_pos()
-        if linux:
-            self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
-            if self.has_finished():
-                return
-            d = ImageDraw.Draw(self.buffer)
-            d.ellipse([self.pos[0]-4, self.pos[1]-4, self.pos[0]+4, self.pos[1]+4], fill=self.colour)
-        else:
-            self.buffer.fill(BLACK)
-            pygame.draw.circle(self.buffer, self.colour, self.pos, 4)
-        if self.pos == self.start:
-            self.update_pos()
-
-
-class TextAnimation(Animation):
-    def __init__(self, buffer, input_text):
-        super().__init__(buffer)
-        self.drawn = False
-        self.angle = 0
-        self.text = Image.new("RGB", size, BLACK) # TODO: minimum necessary size
-        font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 10)
-        draw = ImageDraw.Draw(self.text)
-        draw.text((0, 0), input_text, font=font, fill=WHITE)
-
-    def should_update(self):
-        return self.angle < self.buffer.size[1] #not self.drawn
-
-    def has_finished(self):
-        return not self.should_update()
-
-    def update(self):
-        self.buffer.paste(BLACK, [0, 0, self.buffer.size[0], self.buffer.size[1]])
-        self.angle += 1
-        self.buffer.paste(self.text.resize((self.buffer.size[0], self.angle)), [0, 0])
-
-
-class BackgroundAnimation(Animation):
-    def __init__(self, buffer, colour):
-        super().__init__(buffer)
-        self.colour = colour
-        self.drawn = False
-
-    def should_update(self):
-        return not self.drawn
-
-    def has_finished(self):
-        return self.drawn
-
-    def update(self):
-        self.buffer.paste(self.colour, [0, 0, self.buffer.size[0], self.buffer.size[1]])
-        self.drawn = True
-
-
-class Layer(object):
-    def __init__(self, size, flags=0):
-        if linux:
-            self.buffer = Image.new("RGB", size, BLACK)
-        else:
-            self.buffer = pygame.Surface(size)
-        self.flags = flags
-        self.queue = collections.deque()
-
-    def add_animation(self, anim):
-        anim.buffer = self.buffer
-        self.queue.append(anim)
-
-    def should_update(self):
-        return len(self.queue) > 0 and self.queue[0].should_update()
-
-    def update(self):
-        if not self.should_update():
-            return
-        self.queue[0].update()
-        if self.queue[0].has_finished():
-            self.queue.popleft()
-
-
-# Define the colors we will use in RGB format
-BLACK = (  0,   0,   0)
-WHITE = (255, 255, 255)
-BLUE =  (  0,   0, 255)
-GREEN = (  0, 255,   0)
-RED =   (255,   0,   0)
+from layer import Layer
+from animation import *
+from colours import BLACK, WHITE
+import math
 
 # Set the height and width of the screen
 
@@ -196,7 +83,7 @@ try:
             layer.update()
 
         if linux:
-            im = Image.new("RGB", size, BLACK)
+            im = Image.new("1", size, BLACK)
         for layer in layers:
             if linux:
                 im = ImageChops.difference(im, layer.buffer)
