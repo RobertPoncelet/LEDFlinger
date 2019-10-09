@@ -23,6 +23,7 @@ import math
 
 scaling_factor = 16
 screen_width, screen_height = 32, 8
+size = (screen_width, screen_height)
 
 if linux:
     # create matrix device
@@ -36,7 +37,6 @@ else:
     pygame.display.set_caption("Example code for the draw module")
 
 
-size = (screen_width, screen_height)
 if linux:
     flaggy = 0
 else:
@@ -91,7 +91,7 @@ try:
                 win.blit(pygame.transform.scale(layer.buffer, win.get_rect().size), (0, 0), special_flags=layer.flags)
 
         if linux:
-            device.display(im.convert("1"))
+            device.display(im)
         else:
             pygame.display.flip()
         # END COMPOSITION

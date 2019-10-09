@@ -3,6 +3,8 @@ linux = platform == "linux"
 
 if linux:
     from PIL import Image, ImageFont, ImageDraw, ImageChops
+else:
+    import pygame
 
 from colours import BLACK, WHITE
 
@@ -64,7 +66,7 @@ class TextAnimation(Animation):
             pass # TODO
 
     def should_update(self):
-        return self.angle < self.buffer.size[1] if linux else self.buffer.get_size()
+        return self.angle < (self.buffer.size[1] if linux else self.buffer.get_size()[1])
 
     def has_finished(self):
         return not self.should_update()
