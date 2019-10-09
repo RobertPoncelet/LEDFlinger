@@ -30,7 +30,7 @@ class Compositor(object):
             # create matrix device
             self.serial = spi(port=0, device=0, gpio=noop())
             # TODO: args
-            self.device = max7219(serial, width=self.screen_width, height=self.screen_height,
+            self.device = max7219(self.serial, width=self.screen_width, height=self.screen_height,
                              block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
         else:
             # Initialize the game engine
@@ -72,7 +72,7 @@ class Compositor(object):
                     layer.update()
 
                 if linux:
-                    im = Image.new("1", size, BLACK)
+                    im = Image.new("1", self.size, BLACK)
                 for layer in self.layers:
                     if linux:
                         im = ImageChops.difference(im, layer.buffer)
