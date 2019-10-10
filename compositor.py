@@ -14,6 +14,8 @@ if linux:
 else:
     import pygame
 
+import threading
+
 from layer import Layer
 from animation import *
 from colours import BLACK, WHITE
@@ -25,6 +27,7 @@ class Compositor(object):
         self.screen_width, self.screen_height = self.size
         self.layers = []
         self.done = False
+        self.lock = threading.Lock()
 
         if linux:
             # create matrix device
@@ -54,42 +57,50 @@ class Compositor(object):
                     # Leave this out and we will use all CPU we can.
                     clock.tick(30)
 
+                self.lock.acquire()
+                
+                # START COMPOSITION
                 if not linux:
                     for event in pygame.event.get(): # User did something
                         if event.type == pygame.QUIT: # If user clicked close
-                            self.done=True # Flag that we are done so we exit this loop
+                            self.done = True # Flag that we are done so we exit this loop
 
-                # START COMPOSITION
+                if not self.layers:
+                    self.done = True
+
                 update = False
                 for layer in self.layers:
                     if layer.should_update():
                         update = True
                         break
-                if not update:
-                    continue
+                    
+                if update:
+                    for layer in self.layers:
+                        layer.update()
 
-                for layer in self.layers:
-                    layer.update()
-
-                if linux:
-                    im = Image.new("1", self.size, BLACK)
-                for layer in self.layers:
                     if linux:
-                        im = ImageChops.difference(im, layer.buffer)
-                    else:
-                        self.win.blit(pygame.transform.scale(layer.buffer, self.win.get_rect().size), (0, 0), special_flags=layer.flags)
+                        im = Image.new("1", self.size, BLACK)
+                    for layer in self.layers:
+                        if linux:
+                            im = ImageChops.difference(im, layer.buffer)
+                        else:
+                            self.win.blit(pygame.transform.scale(layer.buffer, self.win.get_rect().size), (0, 0), special_flags=layer.flags)
 
-                if linux:
-                    self.device.display(im)
-                else:
-                    pygame.display.flip()
+                    if linux:
+                        self.device.display(im)
+                    else:
+                        pygame.display.flip()
                 # END COMPOSITION
+
+                self.lock.release()
 
         except KeyboardInterrupt:
             if not linux:
                 # Be IDLE friendly
                 pygame.quit()
 
-        if not linux:
-            pygame.quit()
+    if not linux:
+        pygame.quit()
+    print("compositor exit")
+    
 

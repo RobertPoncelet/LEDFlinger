@@ -4,6 +4,8 @@ linux = platform == "linux"
 if not linux:
     import pygame
 
+import threading
+
 from compositor import Compositor
 from layer import Layer
 from animation import *
@@ -28,5 +30,28 @@ layers[2].add_animation(text_anim)
 layers[3].add_animation(BackgroundAnimation(None, WHITE))
 comp.layers = layers
 
-comp.run()
+def test(comp):
+    msg = input()
+    print("input! " + msg)
+    comp.lock.acquire()
+    print("lock acquired")
+    layers[2].add_animation(TextAnimation(None, msg))
+    layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
+    comp.lock.release()
+    print("lock released")
+    msg = input()
+    comp.lock.acquire()
+    print("lock acquired")
+    comp.done = True
+    comp.lock.release()
+    print("lock released")
+
+thr = threading.Thread(target=comp.run, daemon=True)
+thr2 = threading.Thread(target=test, args=[comp])
+thr.start()
+thr2.start()
+thr.join()
+thr2.join()
+pygame.quit()
+print("all done!")
 
