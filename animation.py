@@ -7,6 +7,7 @@ else:
     import pygame
 
 from colours import BLACK, WHITE
+import datetime
 
 class Animation(object):
     def __init__(self, buffer):
@@ -97,4 +98,29 @@ class BackgroundAnimation(Animation):
             self.buffer.paste(self.colour, [0, 0, self.buffer.size[0], self.buffer.size[1]])
         else:
             pass # TODO
+        self.drawn = True
+
+
+class ClockAnimation(Animation):
+    def __init__(self, buffer):
+        super().__init__(buffer)
+        self.drawn = False
+        now = datetime.datetime.now().time()
+        self.time = str(now.hour) + str(now.minute)
+        self.sheet = Image.open("digits.bmp").convert("1")
+
+    def should_update(self):
+        return not self.drawn
+
+    def has_finished(self):
+        return self.drawn
+
+    def update(self):
+        for d in enumerate(self.time):
+            i = d[0]
+            digit = int(d[1])
+            srcbox = [8*digit, 0, 8*digit+8, 8]
+            dstbox = [8*i, 0]
+            self.buffer.paste(self.sheet.crop(srcbox), dstbox)
+            self.buffer.convert("1")
         self.drawn = True
