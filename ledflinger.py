@@ -4,8 +4,9 @@ linux = platform == "linux"
 if not linux:
     import pygame
 
-import threading
+import threading, time
 
+import ping
 from compositor import Compositor
 from layer import Layer
 from animation import *
@@ -35,9 +36,12 @@ def test(comp):
 
     with comp.lock:
         layers[2].add_animation(TextAnimation(None, msg))
-        layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
 
-    msg = input()
+    while ping.isPhoneAvailable():
+        time.sleep(1.)
+        with comp.lock:
+            layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
+
     with comp.lock:
         comp.done = True
 
