@@ -19,7 +19,7 @@ if linux:
     flaggy = 0
 else:
     flaggy = pygame.BLEND_ADD
-    
+
 layers = [Layer(size), Layer(size, flags=flaggy), Layer(size, flags=flaggy), Layer(size, flags=flaggy)]
 text_anim = TextAnimation(None, "Hello")
 first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height), waiting_for=text_anim)
@@ -32,19 +32,14 @@ comp.layers = layers
 
 def test(comp):
     msg = input()
-    print("input! " + msg)
-    comp.lock.acquire()
-    print("lock acquired")
-    layers[2].add_animation(TextAnimation(None, msg))
-    layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
-    comp.lock.release()
-    print("lock released")
+
+    with comp.lock:
+        layers[2].add_animation(TextAnimation(None, msg))
+        layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0)))
+
     msg = input()
-    comp.lock.acquire()
-    print("lock acquired")
-    comp.done = True
-    comp.lock.release()
-    print("lock released")
+    with comp.lock:
+        comp.done = True
 
 thr = threading.Thread(target=comp.run, daemon=True)
 thr2 = threading.Thread(target=test, args=[comp])
@@ -52,6 +47,6 @@ thr.start()
 thr2.start()
 thr.join()
 thr2.join()
-pygame.quit()
-print("all done!")
+if not linux:
+    pygame.quit()
 
