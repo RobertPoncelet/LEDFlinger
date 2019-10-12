@@ -8,7 +8,6 @@ class ClockAnimation(Animation):
         self.oldtime = "0000"
         self.refresh_time()
         self.step = 0
-        self.counter = 0 # TODO: remove
         self.sheet = Image.open("sheet.png")
 
     def refresh_time(self):
@@ -45,8 +44,6 @@ class ClockAnimation(Animation):
                 inim = ImageChops.add(inim, outim)
             self.buffer.paste(inim, dstbox)
         self.step += 1
-        self.buffer.save("frame" + str(self.counter) + ".png")
-        self.counter += 1
         if self.step >= 5:
             self.oldtime = self.time
             self.step = 0
