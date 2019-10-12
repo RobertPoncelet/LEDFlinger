@@ -48,7 +48,7 @@ class Compositor(object):
             while not self.done:
 
                 if linux:
-                    time.sleep(1./2.) # TODO: replace with luma.core.sprite_system.framerate_regulator
+                    time.sleep(1./20.) # TODO: replace with luma.core.sprite_system.framerate_regulator
                 else:
                     clock.tick(30)
 

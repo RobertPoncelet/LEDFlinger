@@ -6,21 +6,20 @@ class ClockAnimation(Animation):
     def __init__(self, buffer):
         super().__init__(buffer)
         self.oldtime = "0000"
-        self.time = "0001" # TODO: remove
         self.refresh_time()
         self.step = 0
+        self.counter = 0 # TODO: remove
         self.sheet = Image.open("sheet.png")
 
     def refresh_time(self):
-        #now = datetime.datetime.now().time()
-        #hour = str(now.hour).zfill(2)
-        #minute = str(now.minute).zfill(2)
-        #self.time = hour + minute
-        pass
+        now = datetime.datetime.now().time()
+        hour = str(now.minute).zfill(2) # TODO: change back
+        minute = str(now.second).zfill(2)
+        self.time = hour + minute
 
     def sheet_box(self, digit, step, movein):
         if not movein:
-            step += 4
+            step += 5
         return (digit*8, step*8, digit*8+8, step*8+8)
 
     def should_update(self):
@@ -46,7 +45,8 @@ class ClockAnimation(Animation):
                 inim = ImageChops.add(inim, outim)
             self.buffer.paste(inim, dstbox)
         self.step += 1
+        self.buffer.save("frame" + str(self.counter) + ".png")
+        self.counter += 1
         if self.step >= 5:
             self.oldtime = self.time
-            self.time = str(int(self.time)+1).zfill(4) # TODO: remove
             self.step = 0
