@@ -10,6 +10,7 @@ import ping
 from compositor import Compositor
 from layer import Layer
 from animation import *
+from clock import ClockAnimation
 
 screen_width = 32
 screen_height = 8
