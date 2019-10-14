@@ -22,37 +22,27 @@ args = parser.parse_args()
 screen_width = 32
 screen_height = 8
 size = (screen_width, screen_height)
+
 comp = Compositor(size)
-
-if linux:
-    flaggy = 0
-else:
-    flaggy = pygame.BLEND_ADD
-
-layers = [Layer(size), Layer(size, flags=flaggy), Layer(size, flags=flaggy), Layer(size, flags=flaggy)]
-text_anim = TextAnimation(None, "Hello")
-first_anim = CircleAnimation(None, WHITE, (0, 0), (screen_width, screen_height), waiting_for=text_anim)
-layers[0].add_animation(first_anim)
-#layers[0].add_animation(CircleAnimation(None, WHITE, (0, screen_height), (screen_width, 0), waiting_for=text_anim))
-#layers[1].add_animation(CircleAnimation(None, WHITE, (screen_width, 0), (0, screen_height), waiting_for=first_anim))
-layers[2].add_animation(text_anim)
-#layers[3].add_animation(BackgroundAnimation(None, WHITE))
-comp.layers = layers
+layers = [Layer(size)]
+layers[0].add_animation(ClockAnimation(None))
+with comp.lock:
+    comp.layers = layers
 
 def test(comp):
-    msg = input()
-
-    with comp.lock:
-        layers[2].add_animation(ClockAnimation(None))
-
     pingfunc = ping.is_phone_available_fake if args.fakeping else ping.is_phone_available
-    while pingfunc():
-        time.sleep(1.)
 
-    with comp.lock:
-        comp.done = True
+    try:
+        while True:
+            time.sleep(1.)
 
-thr = threading.Thread(target=comp.run, daemon=True)
+            with comp.lock:
+                comp.done = True
+
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
+
+thr = threading.Thread(target=comp.run)
 thr2 = threading.Thread(target=test, args=[comp])
 thr.start()
 thr2.start()

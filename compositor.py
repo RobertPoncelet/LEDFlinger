@@ -45,6 +45,7 @@ class Compositor(object):
         if not linux:
             clock = pygame.time.Clock()
 
+        self.done = False
         try:
             while not self.done:
 
@@ -91,9 +92,11 @@ class Compositor(object):
                 self.lock.release()
 
         except KeyboardInterrupt:
-            if not linux:
-                pygame.quit()
+            pass
 
-        if not linux:
+        self.layers = []
+        if linux:
+            self.device.cleanup()
+        else:
             pygame.quit()
 
