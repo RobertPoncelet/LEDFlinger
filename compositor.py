@@ -34,6 +34,7 @@ class Compositor(object):
             # TODO: args
             self.device = max7219(self.serial, width=self.screen_width, height=self.screen_height,
                              block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
+            self.device.contrast(2)
         else:
             pygame.init()
             self.win = pygame.display.set_mode((self.screen_width*self.scaling_factor, self.screen_height*self.scaling_factor))

@@ -5,15 +5,15 @@ import datetime
 class ClockAnimation(Animation):
     def __init__(self, buffer):
         super().__init__(buffer)
-        self.oldtime = "0000"
+        self.oldtime = "9999"
         self.refresh_time()
         self.step = 0
         self.sheet = Image.open("sheet.png")
 
     def refresh_time(self):
         now = datetime.datetime.now().time()
-        hour = str(now.minute).zfill(2) # TODO: change back
-        minute = str(now.second).zfill(2)
+        hour = str(now.hour).zfill(2) # TODO: change back
+        minute = str(now.minute).zfill(2)
         self.time = hour + minute
 
     def sheet_box(self, digit, step, movein):
