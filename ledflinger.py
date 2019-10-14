@@ -4,13 +4,20 @@ linux = platform == "linux"
 if not linux:
     import pygame
 
-import threading, time
+import threading, time, argparse
 
 import ping
 from compositor import Compositor
 from layer import Layer
 from animation import *
 from clock import ClockAnimation
+
+parser = argparse.ArgumentParser(description='LEDFlinger arguments',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument('--fakeping', type=bool, default=False, help='Instead of actually checking the wifi status, ' \
+    'check for the existence of a file called ping/phone instead')
+args = parser.parse_args()
 
 screen_width = 32
 screen_height = 8
@@ -38,7 +45,8 @@ def test(comp):
     with comp.lock:
         layers[2].add_animation(ClockAnimation(None))
 
-    while ping.isPhoneAvailable():
+    pingfunc = ping.is_phone_available_fake if args.fakeping else ping.is_phone_available
+    while pingfunc():
         time.sleep(1.)
 
     with comp.lock:

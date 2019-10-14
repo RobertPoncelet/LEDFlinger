@@ -21,5 +21,8 @@ def ping(host):
     FNULL = open(os.devnull, 'w')
     return subprocess.call(command, stdout=FNULL, stderr=subprocess.STDOUT) == 0
 
-def isPhoneAvailable():
+def is_phone_available():
     return ping(PHONE_AWAY_IP) or ping(PHONE_HOTSPOT_IP)
+
+def is_phone_available_fake():
+    return os.path.exists("ping/phone")
