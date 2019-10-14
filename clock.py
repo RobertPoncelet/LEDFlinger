@@ -6,7 +6,11 @@ import datetime
 class ClockAnimation(Animation):
     def __init__(self, buffer):
         super().__init__(buffer)
+<<<<<<< HEAD
         self.oldtime = "9999"
+=======
+        self.oldtime = "????"
+>>>>>>> 1398b81... Fixed clock not drawing all the digits at the start
         self.refresh_time()
         self.step = 0
         self.show_colon = False
@@ -52,7 +56,7 @@ class ClockAnimation(Animation):
             if i >= 2:
                 dstbox[0] += 1
             if self.step < 5:
-                outdigit = int(self.oldtime[i])
+                outdigit = digit-1 if self.oldtime[i] == "?" else int(self.oldtime[i])
                 outsrcbox = list(self.sheet_box(outdigit, self.step, False))
                 outim = self.sheet.crop(outsrcbox).convert("L")
                 inim = ImageChops.add(inim, outim)
