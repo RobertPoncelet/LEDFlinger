@@ -6,11 +6,7 @@ import datetime
 class ClockAnimation(Animation):
     def __init__(self, buffer):
         super().__init__(buffer)
-<<<<<<< HEAD
-        self.oldtime = "9999"
-=======
         self.oldtime = "????"
->>>>>>> 1398b81... Fixed clock not drawing all the digits at the start
         self.refresh_time()
         self.step = 0
         self.show_colon = False
@@ -21,8 +17,8 @@ class ClockAnimation(Animation):
 
     def refresh_time(self):
         now = datetime.datetime.now().time()
-        hour = str(now.minute).zfill(2) # TODO: change back
-        minute = str(now.second).zfill(2)
+        hour = str((now.hour+1)%24).zfill(2) # TODO: proper timezone shit
+        minute = str(now.minute).zfill(2)
         self.show_colon = now.microsecond < 500000
         self.time = hour + minute
 
