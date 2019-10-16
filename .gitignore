@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+<<<<<<< HEAD
+=======
+ping/*
+>>>>>>> 07a9362... Fully restart-able composition, yay

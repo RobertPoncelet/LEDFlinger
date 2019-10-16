@@ -29,6 +29,7 @@ class Compositor(object):
         self.done = False
         self.lock = threading.Lock()
 
+    def init_device(self):
         if linux:
             self.serial = spi(port=0, device=0, gpio=noop())
             # TODO: args
@@ -40,6 +41,16 @@ class Compositor(object):
             self.win = pygame.display.set_mode((self.screen_width*self.scaling_factor, self.screen_height*self.scaling_factor))
             pygame.display.set_caption("Compositor")
 
+    def start(self, layers):
+        self.init_device()
+        self.layers = layers
+        self.thr = threading.Thread(target=self.run)
+        self.thr.start()
+
+    def stop(self):
+        with self.lock:
+            self.done = True
+        self.thr.join()
 
     def run(self):
         if not linux:

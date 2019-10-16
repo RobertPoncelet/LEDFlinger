@@ -24,30 +24,37 @@ screen_height = 8
 size = (screen_width, screen_height)
 
 comp = Compositor(size)
-layers = [Layer(size)]
-layers[0].add_animation(ClockAnimation(None))
-with comp.lock:
-    comp.layers = layers
 
 def test(comp):
     pingfunc = ping.is_phone_available_fake if args.fakeping else ping.is_phone_available
+    connected = False
+    connected_previous = False
 
     try:
         while True:
-            time.sleep(1.)
+            connected = pingfunc()
+            if connected and not connected_previous:
+                print("Starting composition")
+                layers = [Layer(size)]
+                layers[0].add_animation(ClockAnimation(None))
+                comp.start(layers)
+            elif connected_previous and not connected:
+                print("Stopping composition")
+                comp.stop()
 
-            with comp.lock:
-                comp.done = True
+            connected_previous = connected
+            time.sleep(5.)
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
 
-thr = threading.Thread(target=comp.run)
-thr2 = threading.Thread(target=test, args=[comp])
-thr.start()
-thr2.start()
-thr.join()
-thr2.join()
+#thr = threading.Thread(target=comp.run)
+#thr2 = threading.Thread(target=test, args=[comp])
+#thr.start()
+#thr2.start()
+#thr.join()
+#thr2.join()
+test(comp)
 if not linux:
     pygame.quit()
 
