@@ -11,6 +11,7 @@ from compositor import Compositor
 from layer import Layer
 from animation import *
 from clock import ClockAnimation
+from message import MessageAnimation
 
 parser = argparse.ArgumentParser(description='LEDFlinger arguments',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -43,7 +44,8 @@ def test(comp):
             if connected and not connected_previous:
                 print("Starting composition")
                 layers = [Layer(size)]
-                layers[0].add_animation(ClockAnimation(None))
+                layers[0].add_animation(MessageAnimation(layers[0].buffer, "Hello"))
+                layers[0].add_animation(ClockAnimation(layers[0].buffer))
                 comp.start(layers)
             elif connected_previous and not connected:
                 print("Stopping composition")

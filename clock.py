@@ -12,8 +12,7 @@ class ClockAnimation(Animation):
         self.show_colon = False
         self.old_show_colon = False
         self.sheet = Image.open("sheet.png")
-        # TODO: make sure animations are initialised with a proper buffer, then uncomment the next line
-        #self.buffer.paste(BLACK, (0, 0, buffer.width, buffer.height))
+        self.buffer.paste(BLACK, (0, 0, buffer.width, buffer.height))
 
     def refresh_time(self):
         now = datetime.datetime.now().time()
