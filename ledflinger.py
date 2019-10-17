@@ -4,7 +4,7 @@ linux = platform == "linux"
 if not linux:
     import pygame
 
-import threading, time, argparse
+import threading, time, argparse, signal
 
 import ping
 from compositor import Compositor
@@ -25,8 +25,15 @@ size = (screen_width, screen_height)
 
 comp = Compositor(size)
 
+def shutdown(signum, frame):
+    comp.stop()
+
+signal.signal(signal.SIGTERM, shutdown)
+
 def test(comp):
     pingfunc = ping.is_phone_available_fake if args.fakeping else ping.is_phone_available
+    if args.fakeping:
+        open("ping/phone", "a").close()
     connected = False
     connected_previous = False
 
@@ -43,7 +50,7 @@ def test(comp):
                 comp.stop()
 
             connected_previous = connected
-            time.sleep(5.)
+            time.sleep(1.)
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
