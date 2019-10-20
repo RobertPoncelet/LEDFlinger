@@ -4,15 +4,17 @@ from colours import BLACK, WHITE
 import datetime
 
 class ClockAnimation(Animation):
-    def __init__(self, buffer):
+    def __init__(self, buffer, intro=None):
         super().__init__(buffer)
-        self.oldtime = "????"
+        self.finished = False
+        self.oldtime = intro.time if intro is not None else "????"
         self.refresh_time()
         self.step = 0
         self.show_colon = False
         self.old_show_colon = False
         self.sheet = Image.open("sheet.png")
-        self.buffer.paste(BLACK, (0, 0, buffer.width, buffer.height))
+        if intro is None:
+            self.buffer.paste(BLACK, (0, 0, buffer.width, buffer.height))
 
     def refresh_time(self):
         now = datetime.datetime.now().time()
@@ -31,7 +33,7 @@ class ClockAnimation(Animation):
         return self.time != self.oldtime or self.show_colon != self.old_show_colon
 
     def has_finished(self):
-        return False
+        return self.finished
 
     def update(self):
         if self.time != self.oldtime:
@@ -66,3 +68,29 @@ class ClockAnimation(Animation):
         self.buffer.putpixel((16, 2), colour)
         self.buffer.putpixel((16, 5), colour)
         self.old_show_colon = self.show_colon
+
+
+class ClockIntroAnimation(ClockAnimation):
+    def __init__(self, buffer):
+        super().__init__(buffer, None)
+
+    def has_finished(self):
+        return self.step > 7
+
+    def update_colon(self):
+        pass
+
+    def update_digits(self):
+        for d in enumerate(self.time):
+            i = d[0]
+            istep = self.step - i # Creates a ripple effect along the digits
+            if istep > 4 or istep < 0:
+                continue
+            digit = int(d[1])
+            insrcbox = self.sheet_box(digit, istep, True)
+            inim = self.sheet.crop(insrcbox).convert("L")
+            dstbox = [8*i, 0]
+            if i >= 2:
+                dstbox[0] += 1
+            self.buffer.paste(inim, dstbox)
+        self.step += 1

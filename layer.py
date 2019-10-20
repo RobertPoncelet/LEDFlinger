@@ -8,7 +8,7 @@ class Layer(object):
         self.queue = collections.deque()
 
     def add_animation(self, anim):
-        anim.buffer = self.buffer
+        #anim.buffer = self.buffer
         self.queue.append(anim)
 
     def should_update(self):

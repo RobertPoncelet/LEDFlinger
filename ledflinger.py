@@ -10,7 +10,7 @@ import ping
 from compositor import Compositor
 from layer import Layer
 from animation import *
-from clock import ClockAnimation
+from clock import ClockAnimation, ClockIntroAnimation
 from message import MessageAnimation
 
 parser = argparse.ArgumentParser(description='LEDFlinger arguments',
@@ -41,11 +41,14 @@ def test(comp):
     try:
         while True:
             connected = pingfunc()
+            #print("ping")
             if connected and not connected_previous:
                 print("Starting composition")
                 layers = [Layer(size)]
                 layers[0].add_animation(MessageAnimation(layers[0].buffer, "Hello"))
-                layers[0].add_animation(ClockAnimation(layers[0].buffer))
+                clock_intro = ClockIntroAnimation(layers[0].buffer)
+                layers[0].add_animation(clock_intro)
+                layers[0].add_animation(ClockAnimation(layers[0].buffer, intro=clock_intro))
                 comp.start(layers)
             elif connected_previous and not connected:
                 print("Stopping composition")
