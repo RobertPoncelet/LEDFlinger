@@ -8,11 +8,14 @@ class Layer(object):
         self.queue = collections.deque()
 
     def add_animation(self, anim):
-        #anim.buffer = self.buffer
+        anim.buffer = self.buffer # TODO: is this still needed?
         self.queue.append(anim)
 
     def should_update(self):
         return len(self.queue) > 0 and self.queue[0].should_update()
+
+    def empty(self):
+        return len(self.queue) > 0
 
     def update(self):
         if not self.should_update():

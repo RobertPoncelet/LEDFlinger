@@ -94,3 +94,29 @@ class ClockIntroAnimation(ClockAnimation):
                 dstbox[0] += 1
             self.buffer.paste(inim, dstbox)
         self.step += 1
+
+class ClockOutroAnimation(ClockAnimation):
+    def __init__(self, buffer, clock):
+        super().__init__(buffer, clock)
+        self.time = clock.time
+
+    def has_finished(self):
+        return self.step > 7
+
+    def update_colon(self):
+        pass
+
+    def update_digits(self):
+        for d in enumerate(self.time):
+            i = d[0]
+            istep = self.step - i # Creates a ripple effect along the digits
+            if istep > 4 or istep < 0:
+                continue
+            digit = int(d[1])
+            insrcbox = self.sheet_box(digit, istep+4, True)
+            inim = self.sheet.crop(insrcbox).convert("L")
+            dstbox = [8*i, 0]
+            if i >= 2:
+                dstbox[0] += 1
+            self.buffer.paste(inim, dstbox)
+        self.step += 1

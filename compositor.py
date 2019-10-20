@@ -27,6 +27,7 @@ class Compositor(object):
         self.screen_width, self.screen_height = self.size
         self.layers = []
         self.done = False
+        self.waiting_for_finish = False
         self.lock = threading.Lock()
 
     def init_device(self):
@@ -47,9 +48,12 @@ class Compositor(object):
         self.thr = threading.Thread(target=self.run)
         self.thr.start()
 
-    def stop(self):
+    def stop(self, wait_for_finish=True):
         with self.lock:
-            self.done = True
+            if wait_for_finish:
+                self.waiting_for_finish = True
+            else:
+                self.done = True
         self.thr.join()
 
     def run(self):
@@ -86,18 +90,31 @@ class Compositor(object):
                     for layer in self.layers:
                         layer.update()
 
-                    if linux:
-                        im = Image.new("1", self.size, BLACK)
-                    for layer in self.layers:
+                    if len(self.layers) == 1:
+                        im = self.layers[0].buffer
+                    else:
                         if linux:
-                            im = ImageChops.difference(im, layer.buffer)
-                        else:
-                            self.win.blit(pygame.transform.scale(layer.buffer, self.win.get_rect().size), (0, 0), special_flags=layer.flags)
+                            im = Image.new("1", self.size, BLACK)
+                        for layer in self.layers:
+                            if linux:
+                                im = ImageChops.difference(im, layer.buffer)
+                            else:
+                                self.win.blit(pygame.transform.scale(layer.buffer, self.win.get_rect().size), (0, 0), special_flags=layer.flags)
 
                     if linux:
                         self.device.display(im)
                     else:
                         pygame.display.flip()
+                else:
+                    # If we're not updating, we might be finished
+                    if self.waiting_for_finish:
+                        finished = True
+                        for layer in self.layers:
+                            if not layer.empty():
+                                finished = False
+                                break
+                        if finished:
+                            self.done = True
                 # END COMPOSITION
 
                 self.lock.release()
