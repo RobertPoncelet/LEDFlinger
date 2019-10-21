@@ -10,8 +10,9 @@ from colours import BLACK, WHITE
 import datetime
 
 class Animation(object):
-    def __init__(self, buffer):
+    def __init__(self, buffer, update_rate=15):
         self.buffer = buffer
+        self.update_interval = 1. / float(update_rate)
 
 
 class CircleAnimation(Animation):

@@ -1,0 +1,10 @@
+TODO:
+- Allow animations to have individual refresh rates
+- Create an event handler class which will create groups of Animations and send them to the compositor when certain events happen
+- Allow animations to finish when certain events happen using a callback mechanism (and have most of them inherit from this)
+- Add a swipe-like transition to have in the background of messages and stuff
+- Fix the pixel format whatever shit so the difference blend mode works properly
+- Add a count for missed pings that only stops composition when it reaches a threshold instead of doing it immediately
+- Fix the clock timezone
+- Accept args to the compositor for the type of device
+

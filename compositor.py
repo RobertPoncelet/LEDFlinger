@@ -26,6 +26,7 @@ class Compositor(object):
         self.size = size
         self.screen_width, self.screen_height = self.size
         self.layers = []
+        self.wait_time = 0.
         self.done = False
         self.waiting_for_finish = False
         self.lock = threading.Lock()
@@ -65,7 +66,7 @@ class Compositor(object):
             while not self.done:
 
                 if linux:
-                    time.sleep(1./20.) # TODO: replace with luma.core.sprite_system.framerate_regulator
+                    time.sleep(self.wait_time) # TODO: replace with luma.core.sprite_system.framerate_regulator
                 else:
                     clock.tick(30)
 
@@ -87,8 +88,11 @@ class Compositor(object):
                         break
 
                 if update:
+                    soonest_update = -1.
                     for layer in self.layers:
                         layer.update()
+                        if soonest_update < 0 or layer.get_next_update() < soonest_update:
+                            soonest_update = layer.get_next_update()
 
                     if len(self.layers) == 1:
                         im = self.layers[0].buffer
@@ -105,6 +109,10 @@ class Compositor(object):
                         self.device.display(im)
                     else:
                         pygame.display.flip()
+
+                    self.wait_time = soonest_update - time.time()
+                    if self.wait_time < 0:
+                        self.wait_time = 0
                 else:
                     # If we're not updating, we might be finished
                     if self.waiting_for_finish:

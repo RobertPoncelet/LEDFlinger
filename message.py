@@ -3,8 +3,8 @@ from PIL import Image, ImageDraw, ImageFont
 from colours import BLACK, WHITE
 
 class MessageAnimation(Animation):
-    def __init__(self, buffer, message):
-        super().__init__(buffer)
+    def __init__(self, buffer, message, update_rate=30):
+        super().__init__(buffer, update_rate)
         im = Image.new("1", (1,1))
         draw = ImageDraw.ImageDraw(im)
         font = ImageFont.truetype("/home/pi/.fonts/Perfect_DOS_VGA_437_Win.ttf", 8)
