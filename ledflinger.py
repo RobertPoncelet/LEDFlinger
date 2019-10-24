@@ -8,10 +8,11 @@ import threading, time, argparse, signal
 
 import ping
 from compositor import Compositor
-from layer import Layer
-from animation import *
-from clock import ClockAnimation, ClockIntroAnimation, ClockOutroAnimation
-from message import MessageAnimation
+from event_handler import EventHandler
+#from layer import Layer
+#from animation import *
+#from clock import ClockAnimation, ClockIntroAnimation, ClockOutroAnimation
+#from message import MessageAnimation
 
 parser = argparse.ArgumentParser(description='LEDFlinger arguments',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -26,13 +27,15 @@ screen_height = 8
 size = (screen_width, screen_height)
 
 comp = Compositor(size)
+handler = EventHandler(comp)
 
 def shutdown(signum, frame):
-    comp.stop()
+    #comp.stop()
+    handler.stop(wait_for_finish=False)
 
 signal.signal(signal.SIGTERM, shutdown)
 
-def test(comp):
+def test(handler):
     pingfunc = ping.is_phone_available_fake if args.fakeping else ping.is_phone_available
     if args.fakeping:
         open("ping/phone", "a").close()
@@ -45,6 +48,8 @@ def test(comp):
             #print("ping")
             if connected and not connected_previous:
                 print("Starting composition")
+                handler.start()
+
                 layers = [Layer(size)]
                 layers[0].add_animation(MessageAnimation(layers[0].buffer, "Hello"))
 
@@ -71,13 +76,7 @@ def test(comp):
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
 
-#thr = threading.Thread(target=comp.run)
-#thr2 = threading.Thread(target=test, args=[comp])
-#thr.start()
-#thr2.start()
-#thr.join()
-#thr2.join()
-test(comp)
+test(handler)
 if not linux:
     pygame.quit()
 
