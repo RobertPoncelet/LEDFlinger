@@ -4,9 +4,10 @@ from colours import BLACK, WHITE
 import datetime
 
 class ClockAnimation(Animation):
-    def __init__(self, buffer, intro=None):
+    def __init__(self, buffer, intro=None, minutes_seconds=False):
         super().__init__(buffer)
         self.finished = False
+        self.minutes_seconds = minutes_seconds
         self.oldtime = intro.time if intro is not None else "????"
         self.refresh_time()
         self.step = 0
@@ -18,8 +19,12 @@ class ClockAnimation(Animation):
 
     def refresh_time(self):
         now = datetime.datetime.now().time()
-        hour = str((now.hour+1)%24).zfill(2) # TODO: proper timezone shit
-        minute = str(now.minute).zfill(2)
+        if self.minutes_seconds:
+            hour = str(now.minute).zfill(2)
+            minute = str(now.second).zfill(2)
+        else:
+            hour = str((now.hour+1)%24).zfill(2) # TODO: proper timezone shit
+            minute = str(now.minute).zfill(2)
         self.show_colon = now.microsecond < 500000
         self.time = hour + minute
 

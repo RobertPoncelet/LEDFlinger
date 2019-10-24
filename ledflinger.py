@@ -17,7 +17,8 @@ parser = argparse.ArgumentParser(description='LEDFlinger arguments',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('--fakeping', type=bool, default=False, help='Instead of actually checking the wifi status, ' \
-    'check for the existence of a file called ping/phone instead')
+    'check for the existence of a file called ping/phone')
+parser.add_argument('--minsec', type=bool, default=False, help='Show minutes/seconds instead of hours/minutes')
 args = parser.parse_args()
 
 screen_width = 32
@@ -50,7 +51,8 @@ def test(comp):
                 clock_intro = ClockIntroAnimation(layers[0].buffer)
                 layers[0].add_animation(clock_intro)
 
-                clock = ClockAnimation(layers[0].buffer, intro=clock_intro)
+                minsec = args.minsec
+                clock = ClockAnimation(layers[0].buffer, intro=clock_intro, minutes_seconds=minsec)
                 layers[0].add_animation(clock)
 
                 comp.start(layers)
