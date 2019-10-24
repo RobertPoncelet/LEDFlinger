@@ -99,18 +99,25 @@ class ClockOutroAnimation(ClockAnimation):
     def __init__(self, buffer, clock):
         super().__init__(buffer, clock)
         self.time = clock.time
+        self.show_colon = False
+        self.old_show_colon = True
 
     def has_finished(self):
-        return self.step > 7
+        return self.step > 9
 
-    def update_colon(self):
-        pass
+    def should_update(self):
+        return True
+
+    def update(self):
+        self.update_digits()
+        if self.show_colon != self.old_show_colon:
+            self.update_colon()
 
     def update_digits(self):
         for d in enumerate(self.time):
             i = d[0]
             istep = self.step - i # Creates a ripple effect along the digits
-            if istep > 4 or istep < 0:
+            if istep > 5 or istep < 0:
                 continue
             digit = int(d[1])
             insrcbox = self.sheet_box(digit, istep+4, True)
