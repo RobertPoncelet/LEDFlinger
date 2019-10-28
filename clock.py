@@ -23,7 +23,7 @@ class ClockAnimation(Animation):
             hour = str(now.minute).zfill(2)
             minute = str(now.second).zfill(2)
         else:
-            hour = str((now.hour+1)%24).zfill(2) # TODO: proper timezone shit
+            hour = str(now.hour).zfill(2) # TODO: proper timezone shit
             minute = str(now.minute).zfill(2)
         self.show_colon = now.microsecond < 500000
         self.time = hour + minute

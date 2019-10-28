@@ -27,7 +27,7 @@ screen_height = 8
 size = (screen_width, screen_height)
 
 comp = Compositor(size)
-handler = EventHandler(comp)
+handler = EventHandler(comp, args.minsec)
 
 def shutdown(signum, frame):
     #comp.stop()
@@ -49,27 +49,9 @@ def test(handler):
             if connected and not connected_previous:
                 print("Starting composition")
                 handler.start()
-
-                layers = [Layer(size)]
-                layers[0].add_animation(MessageAnimation(layers[0].buffer, "Hello"))
-
-                clock_intro = ClockIntroAnimation(layers[0].buffer)
-                layers[0].add_animation(clock_intro)
-
-                minsec = args.minsec
-                clock = ClockAnimation(layers[0].buffer, intro=clock_intro, minutes_seconds=minsec)
-                layers[0].add_animation(clock)
-
-                comp.start(layers)
             elif connected_previous and not connected:
                 print("Stopping composition")
-                clock_outro = ClockOutroAnimation(layers[0].buffer, clock)
-                layers[0].add_animation(clock_outro)
-
-                layers[0].add_animation(MessageAnimation(layers[0].buffer, "Goodnight"))
-                layers[0].queue[0].finished = True
-                comp.stop()
-
+                handler.stop()
             connected_previous = connected
             time.sleep(1.)
 
