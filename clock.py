@@ -76,8 +76,8 @@ class ClockAnimation(Animation):
 
 
 class ClockIntroAnimation(ClockAnimation):
-    def __init__(self, buffer):
-        super().__init__(buffer, None)
+    #def __init__(self, buffer, minutes_seconds=False):
+    #    super().__init__(buffer, None, minutes_seconds)
 
     def has_finished(self):
         return self.step > 7

@@ -16,7 +16,7 @@ class EventHandler(object):
         self.layers = [Layer(self.comp.size)]
         self.layers[0].add_animation(MessageAnimation(self.layers[0].buffer, "Hello"))
 
-        clock_intro = ClockIntroAnimation(self.layers[0].buffer)
+        clock_intro = ClockIntroAnimation(self.layers[0].buffer, minutes_seconds=self.minsec)
         self.layers[0].add_animation(clock_intro)
 
         self.clock = ClockAnimation(self.layers[0].buffer, intro=clock_intro, minutes_seconds=self.minsec)
