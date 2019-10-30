@@ -49,8 +49,10 @@ def test(handler):
             if connected and not connected_previous:
                 print("Starting composition")
                 handler.start()
+                handler.clock_start()
             elif connected_previous and not connected:
                 print("Stopping composition")
+                handler.clock_stop()
                 handler.stop()
             connected_previous = connected
             time.sleep(1.)

@@ -1,7 +1,4 @@
 TODO:
-- Merge the shitty eventhandler branch
-- Make the clock intro respect the minsec flag
-- Create an event handler class which will create groups of Animations and send them to the compositor when certain events happen
 - Allow animations to finish when certain events happen using a callback mechanism (and have most of them inherit from this)
     - Related: allow the clock to finish rolling digits before the outro plays
 - Add a swipe-like transition to have in the background of messages and stuff
