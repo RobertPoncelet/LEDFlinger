@@ -6,6 +6,7 @@ from layer import Layer
 from animation import *
 from clock import *
 from message import MessageAnimation
+from swipe import SwipeAnimation
 
 class EventHandler(object):
     def __init__(self, comp, minsec):
@@ -14,6 +15,7 @@ class EventHandler(object):
 
     def start(self):
         self.main_layer = Layer(self.comp.size)
+        self.main_layer.add_animation(SwipeAnimation(self.main_layer.buffer, True))
         self.main_layer.add_animation(MessageAnimation(self.main_layer.buffer, "Hello"))
         self.layers = [self.main_layer]
         self.comp.start(self.layers)
