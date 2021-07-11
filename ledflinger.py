@@ -53,6 +53,7 @@ def test(handler):
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt")
+        comp.save_debug_image()
 
 test(handler)
 

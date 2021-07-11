@@ -24,6 +24,7 @@ class Compositor(object):
         self.done = False
         self.waiting_for_finish = False
         self.lock = threading.Lock()
+        self.debug_image = None
 
     def init_device(self):
         self.serial = spi(port=0, device=0, gpio=noop())
@@ -31,6 +32,13 @@ class Compositor(object):
         self.device = max7219(self.serial, width=self.screen_width, height=self.screen_height,
                             block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
         self.device.contrast(2)
+
+    def save_debug_image(self):
+        if self.debug_image:
+            print("Saving debug image")
+            self.debug_image.save("debug_image.png")
+        else:
+            print("No debug image to save")
 
     def start(self, layers):
         self.init_device()
@@ -82,6 +90,7 @@ class Compositor(object):
                             im = ImageChops.difference(im, layer.buffer)
 
                     self.device.display(im)
+                    self.debug_image = im
 
                     self.wait_time = soonest_update - time.time()
                     if self.wait_time < 0:
