@@ -1,9 +1,3 @@
-from sys import platform
-linux = platform == "linux"
-
-if not linux:
-    import pygame
-
 import threading, time, argparse, signal
 
 import ping
@@ -61,6 +55,4 @@ def test(handler):
         print("KeyboardInterrupt")
 
 test(handler)
-if not linux:
-    pygame.quit()
 

@@ -1,18 +1,12 @@
-from sys import platform
-linux = platform == "linux"
+from luma.led_matrix.device import max7219
+from luma.core.interface.serial import spi, noop
+from luma.core.render import canvas
+from luma.core.legacy import text
+from luma.core.legacy.font import proportional, LCD_FONT, CP437_FONT
 
-if linux:
-    from luma.led_matrix.device import max7219
-    from luma.core.interface.serial import spi, noop
-    from luma.core.render import canvas
-    from luma.core.legacy import text
-    from luma.core.legacy.font import proportional, LCD_FONT, CP437_FONT
+from PIL import Image, ImageFont, ImageDraw, ImageChops
 
-    from PIL import Image, ImageFont, ImageDraw, ImageChops
-
-    import time
-else:
-    import pygame
+import time
 
 import threading
 
@@ -26,22 +20,17 @@ class Compositor(object):
         self.size = size
         self.screen_width, self.screen_height = self.size
         self.layers = []
-        self.wait_time = 0.
+        self.wait_time = 0.1
         self.done = False
         self.waiting_for_finish = False
         self.lock = threading.Lock()
 
     def init_device(self):
-        if linux:
-            self.serial = spi(port=0, device=0, gpio=noop())
-            # TODO: args
-            self.device = max7219(self.serial, width=self.screen_width, height=self.screen_height,
-                             block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
-            self.device.contrast(2)
-        else:
-            pygame.init()
-            self.win = pygame.display.set_mode((self.screen_width*self.scaling_factor, self.screen_height*self.scaling_factor))
-            pygame.display.set_caption("Compositor")
+        self.serial = spi(port=0, device=0, gpio=noop())
+        # TODO: args
+        self.device = max7219(self.serial, width=self.screen_width, height=self.screen_height,
+                            block_orientation=90, cascaded=4, blocks_arranged_in_reverse_order=True)
+        self.device.contrast(2)
 
     def start(self, layers):
         self.init_device()
@@ -58,25 +47,16 @@ class Compositor(object):
         self.thr.join()
 
     def run(self):
-        if not linux:
-            clock = pygame.time.Clock()
 
         self.done = False
         try:
             while not self.done:
 
-                if linux:
-                    time.sleep(self.wait_time) # TODO: replace with luma.core.sprite_system.framerate_regulator
-                else:
-                    clock.tick(30)
+                time.sleep(self.wait_time) # TODO: replace with luma.core.sprite_system.framerate_regulator
 
                 self.lock.acquire()
 
                 # START COMPOSITION
-                if not linux:
-                    for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            self.done = True
 
                 if not self.layers:
                     self.done = True
@@ -97,18 +77,11 @@ class Compositor(object):
                     if len(self.layers) == 1:
                         im = self.layers[0].buffer
                     else:
-                        if linux:
-                            im = Image.new("1", self.size, BLACK)
+                        im = Image.new("1", self.size, BLACK)
                         for layer in self.layers:
-                            if linux:
-                                im = ImageChops.difference(im, layer.buffer)
-                            else:
-                                self.win.blit(pygame.transform.scale(layer.buffer, self.win.get_rect().size), (0, 0), special_flags=layer.flags)
+                            im = ImageChops.difference(im, layer.buffer)
 
-                    if linux:
-                        self.device.display(im)
-                    else:
-                        pygame.display.flip()
+                    self.device.display(im)
 
                     self.wait_time = soonest_update - time.time()
                     if self.wait_time < 0:
@@ -131,8 +104,5 @@ class Compositor(object):
             pass
 
         self.layers = []
-        if linux:
-            self.device.cleanup()
-        else:
-            pygame.quit()
+        self.device.cleanup()
 

@@ -1,6 +1,3 @@
-from sys import platform
-linux = platform == "linux"
-
 from compositor import Compositor
 from layer import Layer
 from animation import *

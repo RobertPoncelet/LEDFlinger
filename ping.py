@@ -1,6 +1,3 @@
-from sys import platform
-linux = platform == "linux"
-
 import os, subprocess
 
 PHONE_AWAY_IP = "192.168.0.3"
@@ -13,7 +10,7 @@ def ping(host):
     """
 
     # Option for the number of packets as a function of
-    param = '-c' if linux else '-n'
+    param = '-c'
 
     # Building the command. Ex: "ping -c 1 google.com"
     command = ['ping', param, '1', host]
