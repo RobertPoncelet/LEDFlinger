@@ -1,5 +1,4 @@
 from animation import Animation
-from PIL import Image #, ImageDraw
 from colours import BLACK, WHITE
 
 class SwipeAnimation(Animation):

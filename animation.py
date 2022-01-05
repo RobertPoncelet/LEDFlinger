@@ -1,7 +1,6 @@
-from PIL import Image, ImageFont, ImageDraw, ImageChops
+from PIL import Image, ImageFont, ImageDraw
 
 from colours import BLACK, WHITE
-import datetime
 
 class Animation(object):
     def __init__(self, buffer, update_rate=15):

@@ -1,4 +1,3 @@
-from compositor import Compositor
 from layer import Layer
 from animation import *
 from clock import *

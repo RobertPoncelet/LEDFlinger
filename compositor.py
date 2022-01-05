@@ -1,16 +1,12 @@
 from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
-from luma.core.render import canvas
-from luma.core.legacy import text
-from luma.core.legacy.font import proportional, LCD_FONT, CP437_FONT
 
-from PIL import Image, ImageFont, ImageDraw, ImageChops
+from PIL import Image, ImageChops
 
 import time
 
 import threading
 
-from layer import Layer
 from animation import *
 from colours import BLACK, WHITE
 
@@ -69,18 +65,13 @@ class Compositor(object):
                 if not self.layers:
                     self.done = True
 
-                update = False
-                for layer in self.layers:
-                    if layer.should_update():
-                        update = True
-                        break
+                update = any(layer.should_update() for layer in self.layers)
 
                 if update:
-                    soonest_update = -1.
                     for layer in self.layers:
                         layer.update()
-                        if soonest_update < 0 or layer.get_next_update() < soonest_update:
-                            soonest_update = layer.get_next_update()
+
+                    soonest_update = min(layer.get_next_update() for layer in self.layers)
 
                     if len(self.layers) == 1:
                         im = self.layers[0].buffer
@@ -97,14 +88,8 @@ class Compositor(object):
                         self.wait_time = 0
                 else:
                     # If we're not updating, we might be finished
-                    if self.waiting_for_finish:
-                        finished = True
-                        for layer in self.layers:
-                            if not layer.empty():
-                                finished = False
-                                break
-                        if finished:
-                            self.done = True
+                    if self.waiting_for_finish and all(layer.empty() for layer in self.layers):
+                        self.done = True
                 # END COMPOSITION
 
                 self.lock.release()

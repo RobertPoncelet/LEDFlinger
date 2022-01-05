@@ -1,12 +1,8 @@
-import threading, time, argparse, signal
+import time, argparse, signal
 
 import ping
 from compositor import Compositor
 from event_handler import EventHandler
-#from layer import Layer
-#from animation import *
-#from clock import ClockAnimation, ClockIntroAnimation, ClockOutroAnimation
-#from message import MessageAnimation
 
 parser = argparse.ArgumentParser(description='LEDFlinger arguments',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
